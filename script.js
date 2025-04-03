@@ -1,4 +1,4 @@
-// Get references to all input fields, the dropdown, and the buttons
+ // Get references to all input fields, the dropdown, and the buttons
       const inputs = document.querySelectorAll(
         'input[type="text"], input[type="number"]'
       );
