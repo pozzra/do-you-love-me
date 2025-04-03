@@ -1,0 +1,153 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+body {
+  background-color: #f0f0f0;
+}
+.container {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  margin: auto;
+  overflow: hidden;
+  max-width: 500px;
+  margin-top: 50px;
+}
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+input[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+input[type="submit"]:hover {
+  background-color: #45a049;
+}
+.header h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.header img {
+  width: 100px;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px auto;
+  /* add animetions move up move down */
+  animation: fadeIn 1s ease-in-out;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.div-btn {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px 10px;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 5px;
+    color: #4caf50                                                                                                      ;
+}
+h4 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.no {
+  color: #fff;
+  background-color: #f44336;
+  padding: 10px 15px;
+}
+.yes {
+  color: #fff;
+  background-color: #4caf50;
+  padding: 10px 15px;
+}
+.no:hover {
+  background-color: #d32f2f;
+}
+.yes:hover {
+  background-color: #388e3c;
+}
+.no {
+  background-color: #f44336;
+  color: white;
+  position: relative; /* Required for moving the button */
+}
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+#submit {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+#submit:enabled {
+  background-color: #4caf50;
+  cursor: pointer;
+}
+.message {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 24px;
+  color: #4caf50;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px 0;
+  }
+  footer p {
+    margin: 0;
+    font-size: 14px;
+  }
+  footer a {
+    color: #007bff;
+    text-decoration: none;
+  }

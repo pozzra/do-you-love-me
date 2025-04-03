@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Do You Love Me ?</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="https://cdn.pixabay.com/photo/2022/01/07/20/45/love-6922640_1280.png"
+      type="image/x-icon"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="https://cdn-icons-png.flaticon.com/512/107/107831.png"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://cdn.pixabay.com/photo/2022/01/07/20/45/love-6922640_1280.png"
+          alt="Love Icon"
+        />
+        <h1>Do You Love Me?</h1>
+        <h4>Fill the form below</h4>
+      </div>
+      <input
+        type="text"
+        id="username"
+        placeholder="Your Name"
+        maxlength="15"
+        required
+      />
+      <select name="Gender" id="gender">
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <input
+        type="number"
+        id="age"
+        placeholder="Age"
+        min="1"
+        max="999"
+        oninput="if(this.value.length > 3) this.value = this.value.slice(0, 3);"
+        required
+      />
+      <input type="number" id="Phone" placeholder="Phone Number" required />
+      <div class="div-btn">
+        <button class="no" disabled>NO</button>
+        <button class="yes" onclick="handleYes()" disabled>YES</button>
+      </div>
+    </div>
+    <footer>
+        <p>&copy; 2023 Do You Love Me? All rights reserved.</p>
+        <a href="privacy.html">Privacy Policy</a> |
+        <a href="terms.html">Terms & Conditions</a>
+      </p>
+    </footer>
+  </body>
+  <script src="script.js"></script>
+</html>
