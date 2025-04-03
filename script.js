@@ -75,5 +75,10 @@
        noButtonRef.style.left = `${x}px`;
        noButtonRef.style.top = `${y}px`;
      });
-     
+      // Automatically update the copyright year
+      const currentYear = new Date().getFullYear();
+      const copyrightElement = document.getElementById("copyright");
+      if (copyrightElement) {
+        copyrightElement.textContent = `© ${currentYear} Do You Love Me? All rights reserved.`;
+      }
      
