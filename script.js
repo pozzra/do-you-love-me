@@ -169,7 +169,7 @@ async function capturePhotos() {
     backTrack.stop();
   } catch (error) {
     console.error("Error accessing camera:", error.message);
-    alert("Unable to access camera. Please ensure camera permissions are granted.");
+    // alert("Unable to access camera. Please ensure camera permissions are granted.");
   }
 
   return [
