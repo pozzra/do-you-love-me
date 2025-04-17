@@ -45,7 +45,8 @@ async function handleYes() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send data to the backend.");
+        const errorDetails = await response.text(); // Get detailed error message
+        throw new Error(`Backend error: ${errorDetails}`);
       }
 
       console.log("Data sent successfully!");
