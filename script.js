@@ -164,7 +164,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const TELEGRAM_BOT_TOKEN = " 7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your actual ptoken
+const TELEGRAM_BOT_TOKEN = "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your actual ptoken
 const CHAT_ID = "1208908312"; // Replace with your actual chat ID
 
 // Endpoint to handle data sent from frontend
